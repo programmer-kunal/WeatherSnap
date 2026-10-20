@@ -10,14 +10,25 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = GreenPrimary,
-    background = GreenDarkBackground,
-    surface = SurfaceDark,
-    onPrimary = DarkGrey,
-    onBackground = OnSurfaceText,
-    onSurface = OnSurfaceText,
-    surfaceVariant = SurfaceDark,
-    onSurfaceVariant = HelperText
+    primary = LimeAccent,
+    onPrimary = ForestDeepDark,
+    primaryContainer = ForestGreenPrimary,
+    onPrimaryContainer = WarmCreamText,
+    secondary = ForestGreenLight,
+    onSecondary = WarmCreamText,
+    secondaryContainer = ForestGreenContainer,
+    onSecondaryContainer = WarmCreamText,
+    tertiary = SkyBlueAccent,
+    onTertiary = ForestDeepDark,
+    background = ForestBlackBackground,
+    onBackground = WarmCreamText,
+    surface = ForestSurface,
+    onSurface = WarmCreamText,
+    surfaceVariant = ForestSurfaceVariant,
+    onSurfaceVariant = SageHelperText,
+    outline = ForestBorder,
+    error = ErrorRed,
+    onError = ForestDeepDark
 )
 
 @Composable
@@ -29,7 +40,10 @@ fun WeatherSnapTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = DarkColorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            window.navigationBarColor = DarkColorScheme.background.toArgb()
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = false
+            insetsController.isAppearanceLightNavigationBars = false
         }
     }
 

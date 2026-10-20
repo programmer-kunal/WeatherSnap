@@ -18,16 +18,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.text.SpanStyle
+import java.util.Locale
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.border
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.outlined.LocationOn
+import com.example.weathersnap.ui.theme.GreenPrimary
+import com.example.weathersnap.ui.theme.SurfaceDark
+import com.example.weathersnap.ui.theme.DarkGrey
+import com.example.weathersnap.ui.theme.HelperText
 import com.example.weathersnap.domain.model.City
 import com.example.weathersnap.domain.model.Weather
 
 @Composable
 fun WeatherScreen(
-    onNavigateToCreateReport: (String, Double, String, Int, Double, Double) -> Unit = {_,_,_,_,_,_ -> },
-    onNavigateToReports: () -> Unit = {},
+    onNavigateToCreateReport: (String, Double, String, Int, Double, Double, Int?) -> Unit = {_,_,_,_,_,_,_ -> },
+    onNavigateToReports: (String, Int?) -> Unit = { _, _ -> },
     viewModel: WeatherViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -50,7 +59,10 @@ fun WeatherScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
             Button(
-                onClick = onNavigateToReports,
+                onClick = {
+                    val city = uiState.selectedCity
+                    onNavigateToReports(city?.name ?: "", city?.id)
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
@@ -149,21 +161,27 @@ fun WeatherScreen(
 
         uiState.weather?.let { weather ->
             uiState.selectedCity?.let { city ->
-                WeatherCard(city = city, weather = weather)
+                WeatherCard(
+                    city = city,
+                    weather = weather,
+                    isDefaultLocation = uiState.isDefaultLocation,
+                    onToggleDefaultLocation = { viewModel.onToggleDefaultCity(city) }
+                )
             }
             
             Spacer(modifier = Modifier.height(24.dp))
             
             Button(
                 onClick = { 
-                    val cityName = uiState.selectedCity?.displayName ?: ""
+                    val city = uiState.selectedCity
                     onNavigateToCreateReport(
-                        cityName,
+                        city?.displayName ?: "",
                         weather.temperature,
                         weather.conditionText,
                         weather.humidity,
                         weather.windSpeed,
-                        weather.pressure
+                        weather.pressure,
+                        city?.id
                     )
                 },
                 modifier = Modifier
@@ -182,7 +200,12 @@ fun WeatherScreen(
 }
 
 @Composable
-fun WeatherCard(city: City, weather: Weather) {
+fun WeatherCard(
+    city: City,
+    weather: Weather,
+    isDefaultLocation: Boolean = false,
+    onToggleDefaultLocation: () -> Unit = {}
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -191,30 +214,61 @@ fun WeatherCard(city: City, weather: Weather) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                // 1. Full city address & condition on the left
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                ) {
                     Text(
                         text = city.displayName,
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
-                        maxLines = 1
+                        maxLines = 2,
+                        lineHeight = 24.sp
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = weather.conditionText,
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+
+                // 2. Circular default-location icon next to the address
+                IconButton(
+                    onClick = onToggleDefaultLocation,
+                    modifier = Modifier
+                        .padding(end = 12.dp)
+                        .size(36.dp)
+                        .background(
+                            color = if (isDefaultLocation) GreenPrimary else SurfaceDark,
+                            shape = CircleShape
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = if (isDefaultLocation) GreenPrimary else HelperText.copy(alpha = 0.5f),
+                            shape = CircleShape
+                        )
+                ) {
+                    Icon(
+                        imageVector = if (isDefaultLocation) Icons.Filled.LocationOn else Icons.Outlined.LocationOn,
+                        contentDescription = if (isDefaultLocation) "Remove default location" else "Make this the default location",
+                        tint = if (isDefaultLocation) DarkGrey else GreenPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                // 3. Temperature on the right
                 Text(
-                    text = String.format("%.1f°C", weather.temperature),
+                    text = String.format(Locale.getDefault(), "%.1f°C", weather.temperature),
                     fontSize = 36.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 8.dp),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.End,
+                    color = GreenPrimary,
+                    textAlign = TextAlign.End,
                     softWrap = false,
                     maxLines = 1
                 )

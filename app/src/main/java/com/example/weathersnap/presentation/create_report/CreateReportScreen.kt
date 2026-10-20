@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import android.graphics.BitmapFactory
 import androidx.hilt.navigation.compose.hiltViewModel
+import java.util.Locale
 
 @Composable
 fun CreateReportScreen(
@@ -28,7 +29,8 @@ fun CreateReportScreen(
     pressure: Double,
     capturedImagePath: String?,
     onNavigateToCamera: () -> Unit,
-    onNavigateToSavedReports: () -> Unit,
+    onNavigateToCommunityReports: (String, Int?) -> Unit,
+    cityId: Int = 0,
     viewModel: CreateReportViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -41,7 +43,7 @@ fun CreateReportScreen(
 
     LaunchedEffect(uiState.saveSuccess) {
         if (uiState.saveSuccess) {
-            onNavigateToSavedReports()
+            onNavigateToCommunityReports(cityName, cityId)
         }
     }
 
@@ -66,12 +68,23 @@ fun CreateReportScreen(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "Location: $cityName", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
-                Text(text = "Weather: ${String.format("%.1f", temperature)}°C, $condition", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = "Location: $cityName",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                    maxLines = 2
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Weather: ${String.format(Locale.getDefault(), "%.1f", temperature)}°C, $condition",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 14.sp
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // Image Preview Section
         Card(
@@ -104,19 +117,23 @@ fun CreateReportScreen(
 
         Button(
             onClick = onNavigateToCamera,
-            modifier = Modifier.fillMaxWidth().height(50.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
         ) {
             Text("Capture Photo")
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
             value = uiState.notes,
             onValueChange = viewModel::onNotesChange,
-            modifier = Modifier.fillMaxWidth().weight(1f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
             placeholder = { Text("Add notes here...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -127,20 +144,39 @@ fun CreateReportScreen(
             )
         )
 
+        uiState.errorMessage?.let { error ->
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = error,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 13.sp
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
-                viewModel.saveReport(cityName, temperature, condition, humidity, windSpeed, pressure)
+                viewModel.saveReport(
+                    cityName = cityName,
+                    temperature = temperature,
+                    condition = condition,
+                    humidity = humidity,
+                    windSpeed = windSpeed,
+                    pressure = pressure,
+                    cityId = cityId
+                )
             },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
             shape = RoundedCornerShape(12.dp),
             enabled = uiState.imagePath != null && !uiState.isSaving
         ) {
             if (uiState.isSaving) {
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
             } else {
-                Text("Save Report", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text("Publish Report", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

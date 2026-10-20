@@ -3,6 +3,7 @@ package com.example.weathersnap.presentation.reports
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,6 +14,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,10 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.text.SpanStyle
 import com.example.weathersnap.data.local.entity.ReportEntity
+import com.example.weathersnap.presentation.common.FullScreenPhotoViewerDialog
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -36,6 +38,8 @@ fun SavedReportsScreen(
     viewModel: SavedReportsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var viewingPhotoPath by remember { mutableStateOf<String?>(null) }
+    var viewingPhotoTitle by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -56,7 +60,7 @@ fun SavedReportsScreen(
                 )
             }
             Text(
-                text = "Saved Reports",
+                text = "Saved on This Device",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -82,15 +86,32 @@ fun SavedReportsScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(uiState.reports) { report ->
-                    ReportItem(report = report)
+                    ReportItem(
+                        report = report,
+                        onPhotoClick = { path ->
+                            viewingPhotoPath = path
+                            viewingPhotoTitle = report.cityName
+                        }
+                    )
                 }
             }
+        }
+
+        if (viewingPhotoPath != null) {
+            FullScreenPhotoViewerDialog(
+                imageModel = viewingPhotoPath,
+                onDismiss = { viewingPhotoPath = null },
+                title = viewingPhotoTitle
+            )
         }
     }
 }
 
 @Composable
-fun ReportItem(report: ReportEntity) {
+fun ReportItem(
+    report: ReportEntity,
+    onPhotoClick: ((String) -> Unit)? = null
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -156,7 +177,14 @@ fun ReportItem(report: ReportEntity) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(180.dp)
-                            .clip(RoundedCornerShape(12.dp)),
+                            .clip(RoundedCornerShape(12.dp))
+                            .then(
+                                if (onPhotoClick != null) {
+                                    Modifier.clickable { onPhotoClick(report.imagePath) }
+                                } else {
+                                    Modifier
+                                }
+                            ),
                         contentScale = ContentScale.Crop
                     )
                 }

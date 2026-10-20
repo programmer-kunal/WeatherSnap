@@ -24,7 +24,8 @@ data class WeatherUiState(
     val weather: Weather? = null,
     val isLoadingWeather: Boolean = false,
     val weatherError: String? = null,
-    val searchError: String? = null
+    val searchError: String? = null,
+    val isDefaultLocation: Boolean = false
 )
 
 @HiltViewModel
@@ -43,7 +44,7 @@ class WeatherViewModel @Inject constructor(
     }
 
     private fun restoreLastCity() {
-        preferences.getLastCity()?.let { city ->
+        preferences.getDefaultCity()?.let { city ->
             onCitySelected(city)
         }
     }
@@ -84,6 +85,8 @@ class WeatherViewModel @Inject constructor(
     }
 
     fun onCitySelected(city: City) {
+        preferences.saveLastCity(city)
+        val isDefault = preferences.isDefaultCity(city)
         _uiState.update { 
             it.copy(
                 selectedCity = city,
@@ -91,7 +94,8 @@ class WeatherViewModel @Inject constructor(
                 citySuggestions = emptyList(),
                 weather = null,
                 isLoadingWeather = true,
-                weatherError = null
+                weatherError = null,
+                isDefaultLocation = isDefault
             ) 
         }
         
@@ -104,8 +108,6 @@ class WeatherViewModel @Inject constructor(
                             isLoadingWeather = false
                         ) 
                     }
-                    // Save city only after successful weather fetch
-                    preferences.saveLastCity(city)
                 }
                 is NetworkResult.Error -> {
                     _uiState.update { 
@@ -118,5 +120,19 @@ class WeatherViewModel @Inject constructor(
                 else -> {}
             }
         }
+    }
+
+    fun onToggleDefaultCity(city: City) {
+        if (_uiState.value.isDefaultLocation && preferences.isDefaultCity(city)) {
+            preferences.clearDefaultCity()
+            _uiState.update { it.copy(isDefaultLocation = false) }
+        } else {
+            preferences.saveDefaultCity(city)
+            _uiState.update { it.copy(isDefaultLocation = true) }
+        }
+    }
+
+    fun onSetDefaultCity(city: City) {
+        onToggleDefaultCity(city)
     }
 }

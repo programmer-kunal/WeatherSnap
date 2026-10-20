@@ -7,4 +7,11 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- WeatherSnap Brand Palette -->
+    <color name="forest_dark_background">#FF0C1710</color>
+    <color name="forest_surface">#FF14241B</color>
+    <color name="forest_green_primary">#FF165C38</color>
+    <color name="lime_accent">#FFC5E84A</color>
+    <color name="warm_cream">#FFF4F6EE</color>
 </resources>

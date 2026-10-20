@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <!-- Rainy dark sky background -->
+    <path
+        android:fillColor="#182026"
+        android:pathData="M0,0h320v180h-320z" />
+    <path
+        android:fillColor="#1B262F"
+        android:pathData="M0,100 Q160,80 320,110 L320,180 L0,180 Z" />
+    <!-- Dark cloud -->
+    <path
+        android:fillColor="#32404B"
+        android:pathData="M70,75 a22,22 0 0,1 38,-12 a32,32 0 0,1 58,4 a24,24 0 0,1 28,24 l-124,0 a18,18 0 0,1 0,-16 z" />
+    <!-- Rain streaks -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#5B8FAF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M85,105 L75,130 M115,105 L105,130 M145,105 L135,130 M175,105 L165,130 M100,135 L90,160 M130,135 L120,160 M160,135 L150,160" />
+</vector>

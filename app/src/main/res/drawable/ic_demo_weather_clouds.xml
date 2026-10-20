@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+    <!-- Cloudy sky background -->
+    <path
+        android:fillColor="#1E2428"
+        android:pathData="M0,0h320v180h-320z" />
+    <path
+        android:fillColor="#242C31"
+        android:pathData="M0,90 Q160,70 320,100 L320,180 L0,180 Z" />
+    <!-- Stylized cloud clusters -->
+    <path
+        android:fillColor="#3D4B54"
+        android:pathData="M80,80 a20,20 0 0,1 35,-10 a28,28 0 0,1 50,4 a22,22 0 0,1 25,22 l-110,0 a16,16 0 0,1 0,-16 z" />
+    <path
+        android:fillColor="#4F606A"
+        android:pathData="M140,65 a18,18 0 0,1 30,-8 a24,24 0 0,1 42,4 a18,18 0 0,1 20,18 l-92,0 a14,14 0 0,1 0,-14 z" />
+</vector>
